@@ -109,3 +109,36 @@ Conversation checkpoints are stored in memory and are lost when the server resta
 - **Checkpointer requires `thread_id`**: Ensure the frontend passes `config=CONFIG` to `chatbot.invoke(...)`. The included frontend already supplies this configuration.
 - **Port already in use**: Run `python -m streamlit run streamlit_frontend.py --server.port 8502`.
 - **An old traceback appears after a fix**: Save your files, stop the running app with Ctrl+C, and restart it from the correct project folder.
+
+## 3. Resume feature docs
+
+The following features describe the planned conversation management workflow.
+
+### Sidebar and session setup
+
+- Add a sidebar with a title, a **Start Chat** button, and a heading named **My Conversations**.
+- Generate a dynamic `thread_id` and store it in Streamlit session state.
+- Display the current `thread_id` in the sidebar.
+
+### New chat
+
+- Add a **New Chat** button.
+- Clicking **New Chat** opens a fresh conversation in the chat area:
+  - Generate a new `thread_id`.
+  - Save it in session state.
+  - Reset the displayed message history.
+
+### Conversation list
+
+- Create a list to store all `thread_id` values.
+- Display all saved thread IDs in the sidebar under **My Conversations**.
+- Render each thread ID as a clickable button.
+
+### Resume a conversation
+
+- Clicking a thread ID selects that conversation.
+- Save the selected `thread_id` in session state.
+- Load that thread's conversation history from the LangGraph checkpointer and display its messages.
+- Continue the conversation using the selected thread ID.
+
+With the current in-memory checkpointer, conversations are available only while the server remains running.
