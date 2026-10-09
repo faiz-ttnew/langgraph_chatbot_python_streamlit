@@ -33,6 +33,9 @@ if 'thread_id' not in st.session_state:
 if 'chat_threads' not in st.session_state:
     st.session_state['chat_threads'] = []
 
+if 'chat_titles' not in st.session_state:
+    st.session_state['chat_titles'] = {}
+
 add_thread(st.session_state['thread_id'])
 
 #*******************************Sidebar UI******************************************#
@@ -43,8 +46,13 @@ if st.sidebar.button('New Chat'):
 
 st.sidebar.header("My Conversations")
 
+# for thread_id in st.session_state['chat_threads'][::-1]:
+#     if st.sidebar.button(str(thread_id)):
 for thread_id in st.session_state['chat_threads'][::-1]:
-    if st.sidebar.button(str(thread_id)):
+    title = st.session_state['chat_titles'].get(
+        thread_id, 'New Chat'
+    )
+    if st.sidebar.button(title, key=str(thread_id)):
         st.session_state['thread_id'] = thread_id
         messages = load_conversation(thread_id)
 
@@ -69,6 +77,10 @@ user_input = st.chat_input('Type here')
 
 if user_input:
     # first add the message to message history
+    current_thread = st.session_state['thread_id']
+    if current_thread not in st.session_state['chat_titles']:
+        st.session_state['chat_titles'][current_thread] = user_input
+
     st.session_state['message_history'].append({
         'role': 'user', 'content': user_input
     })
@@ -89,3 +101,4 @@ if user_input:
 
     # second add the message to message history
     st.session_state['message_history'].append({'role': 'assistant', 'content': ai_message})
+    st.rerun()
