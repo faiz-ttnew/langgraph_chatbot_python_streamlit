@@ -8,3 +8,10 @@ __pycache__/
 *.py[cod]
 .venv_backup/
 venv_backup/
+# Local SQLite database and companion files
+chatbot.db
+chatbot.db-shm
+chatbot.db-wal
+.chatbot.db
+.chatbot.db-shm
+.chatbot.db-wal

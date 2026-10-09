@@ -99,7 +99,36 @@ For later runs, open a terminal in the project folder, activate the virtual envi
 | `.env.example` | API key configuration template |
 | `.gitignore` | Excludes credentials, virtual environments, and Python caches |
 
-Conversation checkpoints are stored in memory and are lost when the server restarts. Browser session history resets when the Streamlit session is lost. This project does not use a persistent database.
+The basic app stores conversation checkpoints in memory, which are lost when the server restarts. Browser session history resets when the Streamlit session is lost. The database app (`streamlit_frontend_database.py`) uses `langgraph_database_backend.py` to persist checkpoints in a local SQLite database.
+
+## Local database files and Git
+
+Run the database app from the project folder with:
+
+```bash
+python -m streamlit run streamlit_frontend_database.py
+```
+
+The database backend creates `chatbot.db` locally. SQLite may also create `chatbot.db-shm` and `chatbot.db-wal` companion files. These contain local conversation data and must stay out of Git. The following filenames are excluded by `.gitignore`:
+
+```gitignore
+chatbot.db
+chatbot.db-shm
+chatbot.db-wal
+.chatbot.db
+.chatbot.db-shm
+.chatbot.db-wal
+```
+
+These rules have no trailing `/` because they match files. Keep the files on your machine; do not commit or push them. Each machine creates its own database when the database app runs.
+
+If these files were committed previously, `.gitignore` alone does not stop tracking them. Remove only their Git index entries (keeping local files) with:
+
+```bash
+git rm --cached --ignore-unmatch -- chatbot.db chatbot.db-shm chatbot.db-wal .chatbot.db .chatbot.db-shm .chatbot.db-wal
+```
+
+This stops tracking in future commits; it does not remove database contents from earlier commits.
 
 ## Troubleshooting
 
