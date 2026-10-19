@@ -73,6 +73,41 @@ def get_stock_price(symbol: str) -> dict:
      r = requests.get(url)
      return r.json()
 
+@tool
+def get_weahter(city: str)->dict:
+     """
+    Get current weather information for a city.
+    Returns temperature, humidity, weather condition
+    and wind speed.
+    """
+     api_key = os.getenv("OPEN_WEATHER_API_KEY")
+     if not api_key:
+        return {"error": "OPENWEATHER_API_KEY is missing"}
+     url = "https://api.openweathermap.org/data/2.5/weather"
+
+     params = {
+         "q": city,
+         'appid': api_key,
+         'units': 'metric'
+     }
+
+     try:
+         response = requests.get(url, params=params, timeout=10)
+         response.raise_for_status()
+
+         data = response.json()
+
+         return {
+             "city": data['name'],
+             "temperature": data["main"]["temp"],
+             "humidity": data["main"]["humidity"],
+             "weather": data["weather"][0]["description"]
+         }
+     except (requests.RequestException, KeyError, IndexError, ValueError) as e:
+        return {"error": str(e)}
+         
+
+
 tools = [search_tool, get_stock_price, calculator]
 llm_with_tools = llm.bind_tools(tools)
 

@@ -1,5 +1,5 @@
 import streamlit as st
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 from langgraph_tool_backend import chatbot
 from uuid import uuid4
 
@@ -90,15 +90,36 @@ if user_input:
     CONFIG = {'configurable': {'thread_id': st.session_state['thread_id']}}
 
     with st.chat_message('assistant'):
+        status_slot = st.empty()          # placeholder shown above the answer
+        status_holder = {"box": None}
+
         def ai_only_stream():
             for message_chunk, metadata in chatbot.stream(
                 {"messages": [HumanMessage(content=user_input)]},
                 config=CONFIG,
                 stream_mode='messages'
             ):
+                # 1) Model decided to call a tool -> show which one
                 if isinstance(message_chunk, AIMessage):
-                    # yield only assistant tokens
+                    for tc in getattr(message_chunk, "tool_call_chunks", []) or []:
+                        if tc.get("name"):
+                            label = f"🔧 Calling `{tc['name']}`..."
+                            if status_holder["box"] is None:
+                                status_holder["box"] = status_slot.status(label, expanded=False)
+                            else:
+                                status_holder["box"].update(label=label, state="running")
+
+                # 2) Tool finished
+                if isinstance(message_chunk, ToolMessage) and status_holder["box"] is not None:
+                    status_holder["box"].update(
+                        label=f"✅ `{message_chunk.name}` finished",
+                        state="complete",
+                    )
+
+                # 3) Stream only assistant text tokens
+                if isinstance(message_chunk, AIMessage) and message_chunk.content:
                     yield message_chunk.content
+
         ai_message = st.write_stream(ai_only_stream())
 
     # second add the message to message history
