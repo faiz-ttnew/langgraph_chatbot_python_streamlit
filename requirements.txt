@@ -11,3 +11,8 @@ requests
 # MCP Server & Client
 mcp
 langchain-mcp-adapters
+sentence-transformers
+langchain-huggingface
+torchvision
+pypdf
+faiss-cpu
